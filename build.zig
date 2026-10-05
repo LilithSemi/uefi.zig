@@ -58,9 +58,8 @@ fn archConfig(arch: std.Target.Cpu.Arch) ?ArchConfig {
 }
 
 pub fn build(b: *std.Build) void {
-    // Default to x86_64 UEFI; -Dtarget=<arch>-uefi picks another architecture.
     const target = b.standardTargetOptions(.{
-        .default_target = .{ .cpu_arch = .x86_64, .os_tag = .uefi },
+        .default_target = .{ .os_tag = .uefi },
     });
     const optimize = b.standardOptimizeOption(.{});
 
@@ -124,7 +123,9 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
-    const qemu_path = b.findProgram(&.{cfg.qemu_bin}, &.{}) catch cfg.qemu_bin;
+    const qemu_path = b.findProgram(.{
+        .names = &.{cfg.qemu_bin},
+    }) orelse cfg.qemu_bin;
 
     const run = b.addRunArtifact(runner);
     run.addArg(b.fmt("{d}", .{timeout}));
